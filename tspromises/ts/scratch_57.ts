@@ -59,7 +59,3 @@ module Utils {
 		}
 	}
 }
-
-// create new instance of ResourceLoader, 
-// TODO: how to pass parameter to load function
-//var myTester = new Utils.ResourceLoader({url: "gmx.de"})

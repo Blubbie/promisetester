@@ -4,13 +4,18 @@ var expect = require('chai').expect;
 var chaiAsPromised = require("chai-as-promised");
 var sinon = require('sinon');
 
- var resLoader = require('../js/scratch_57');
 
-// for browser, testrunner.html
+var Utils = require('../js/scratch_57_export');
+
+var resLoader = new Utils.ResourceLoader();
+
+
+
+ // for browser, testrunner.html
  // var expect = chai.expect;
  //var chaiAsPromised = chaiAsPromised;
- 
-// chai.use(chaiAsPromised);
+
+ // chai.use(chaiAsPromised);
 
 
 // this polyfills the native ES6 promise, in case node is older than 0.12
@@ -18,19 +23,21 @@ var sinon = require('sinon');
 var Promise = require('es6-promise').Promise;
 
 var testResources = {
-	welt: 	{ url: 'welt.de'},
-	zeit: 	{ url: 'zeit.de'},
-	spiegel: { url: 'spiegel.de'},
-	sz: 		{ url: 'sz.de'}
+	welt: 		{ url: 'welt.de'},
+	zeit: 		{ url: 'zeit.de'},
+	spiegel: 	{ url: 'spiegel.de'},
+	sz: 			{ url: 'sz.de'},
+	invalid: 	{ bla: 'I am invalid'},
+	valid: 		{ url: 'welt.de'}
 }
 var Resource = { url: 'welt.de'};
-var resLoader = "";
+//var resLoader = "";
 
 describe('ResourceLoader:', function() {
 	beforeEach(function() {
 		resLoader = new Utils.ResourceLoader(Resource);
 	});
-	
+
 	describe('First some basic promise tests:', function() {
 		it('calling Promise.resolve, should pass the test', function() {
 		  var p = Promise.resolve('this promise will always be resolved');
@@ -70,12 +77,15 @@ describe('ResourceLoader:', function() {
 		});
 
 	describe('Calling ResourceLoader with:', function() {
-		it('TODO: Empty resource should throw an error', function() {
+		it('Empty resource should resolve hard coded resource', function() {
 			var result = new Utils.ResourceLoader();
+			return expect(result.loadPromise()).to.eventually.equal("RESOLVED: using hard coded resource!");
+		});
+		it('Invalid resource should throw an error', function() {
+			var result = new Utils.ResourceLoader(testResources.invalid);
 			// TODO: does not work yet: expect(result).to.throw(Error);
 			//return expect(result.loadPromise()).to.become("successfully resolved WITHOUT url");
-			return expect(result.loadPromise()).to.eventually.equal("successfully resolved WITHOUT url");
-
+			return expect(result.loadPromise()).to.rejectedWith('REJECTED: invalid resource!');
 		});
 	});
 
@@ -85,10 +95,6 @@ describe('ResourceLoader:', function() {
 		});
 
 		it('try multiple promise assertions', function() {
-			//var res1 = 'welt.de';
-			//var res2 = 'zeit.de';
-			//var p1 = Promise.resolve(res1);
-			//var p2 = Promise.resolve(res2);
 			var res1 = testResources.welt;
 			var res2 = testResources.zeit;
 			var res3 = testResources.spiegel;
@@ -104,15 +110,11 @@ describe('ResourceLoader:', function() {
 
 
 		it('default Promise rejected', function() {
+			//var result = new Utils.ResourceLoader(testResources.invalid);
+			//var p = result.loadPromise().reject(new TypeError('Promise REJECTED, TypeError!'));
 			var p = Promise.reject(new TypeError('Promise REJECTED, TypeError!'));
 			return expect(p).to.be.rejectedWith(TypeError,'Promise REJECTED, TypeError!');
 		});
-
-		it('TODO: loadPromise rejected', function() {
-			var p = resLoader.loadPromise();
-			return expect(!false).to.be.ok;//TODO			
-			//return expect(p).to.be.rejectedWith(TypeError,'Promise REJECTED, TypeError!');
-		});		
 	});
 
 
